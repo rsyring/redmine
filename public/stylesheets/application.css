@@ -875,6 +875,26 @@ h2 img { vertical-align:middle; }
 
 .hascontextmenu { cursor: context-menu; }
 
+/***** Issues Index when format == 'print' ******/
+
+div#printable-issues div.group-wrapper{
+  margin-left: 1.5em;
+}
+
+div#printable-issues ul {
+  margin-left: 0;
+  padding: 0;
+}
+
+div#printable-issues ul {
+  margin:0 0 0 0;
+  padding: 0 0 0 2.5em;
+}
+
+div#printable-issues div.issue-description {
+  margin-left: 1.5em;
+}
+
 /***** Media print specific styles *****/
 @media print {
   #top-menu, #header, #main-menu, #sidebar, #footer, .contextual, .other-formats { display:none; }

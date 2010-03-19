@@ -1,0 +1,44 @@
+
+<% if @issues.empty? %>
+    <p class="nodata"><%= l(:label_no_data) %></p>
+<% else %>
+    <div id="printable-issues">
+        <% previous_group = false %>
+        <% subject_header_type = @query.grouped? ? 'h3' : 'h2' %>
+        <% @issues.each do |issue| -%>
+            <% if @query.grouped? && (group = @query.group_by_column.value(issue)) != previous_group %>                
+                <% if previous_group != false %>
+                    </div>
+                <% end %>
+                <h2 class='group-heading'>
+                    <%= group.blank? ? 'None' : column_content(@query.group_by_column, issue) %> <span class="count">(<%= @issue_count_by_group[group] %>)</span>
+                </h2>
+                <div class="group-wrapper">
+                <% previous_group = group %>
+            <% end %>
+            <%= content_tag subject_header_type, '#%s - %s' % [issue.id, issue.subject], :class => 'subject-heading' %>
+            <% if (@query.column_names && (!@query.column_names.include? :subject)) || @query.columns.size > 1 %>
+                <ul class='issue-cols'>
+                    <% @query.columns.each do |column| %>
+                        <% if column.name != :subject %>
+                        <li>
+                            <%= content_tag 'strong', column.name %>:
+                            <%= content_tag 'span', column_content(column, issue).empty? ? '&nbsp;' : column_content(column, issue) , :class => column.name %>
+                        </li>
+                        <% end %>
+                    <% end %>
+                </ul>
+            <% end -%>
+            <div class='issue-description'>
+            <%= textilizable issue, :description %>
+            </div>
+        <% end -%>
+        <% if previous_group != false %>
+            </div>
+        <% end %>
+    </div>
+<% end %>
+
+<% content_for :sidebar do %>
+    <%= render :partial => 'issues/sidebar' %>
+<% end %>

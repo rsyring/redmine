@@ -57,10 +57,10 @@ class IssuesController < ApplicationController
     retrieve_query
     sort_init(@query.sort_criteria.empty? ? [['id', 'desc']] : @query.sort_criteria)
     sort_update({'id' => "#{Issue.table_name}.id"}.merge(@query.available_columns.inject({}) {|h, c| h[c.name.to_s] = c.sortable; h}))
-    
+
     if @query.valid?
       limit = case params[:format]
-      when 'csv', 'pdf'
+      when 'csv', 'pdf', 'print'
         Setting.issues_export_limit.to_i
       when 'atom'
         Setting.feeds_limit.to_i
@@ -76,8 +76,15 @@ class IssuesController < ApplicationController
                               :limit => limit)
       @issue_count_by_group = @query.issue_count_by_group
       
+      if params['format'] == 'print'
+        params['format'] = 'html'
+        html_template_file = 'issues/print.rhtml'
+      else
+        html_template_file = 'issues/index.rhtml'
+      end
+      
       respond_to do |format|
-        format.html { render :template => 'issues/index.rhtml', :layout => !request.xhr? }
+        format.html { render :template => html_template_file, :layout => !request.xhr? }
         format.xml  { render :layout => false }
         format.atom { render_feed(@issues, :title => "#{@project || Setting.app_title}: #{l(:label_issue_plural)}") }
         format.csv  { send_data(issues_to_csv(@issues, @project), :type => 'text/csv; header=present', :filename => 'export.csv') }

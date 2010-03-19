@@ -175,7 +175,7 @@ class IssuesControllerTest < ActionController::TestCase
     assert_not_nil assigns(:issues)
     assert_equal 'text/csv', @response.content_type
   end
-  
+
   def test_index_pdf
     get :index, :format => 'pdf'
     assert_response :success
@@ -199,6 +199,40 @@ class IssuesControllerTest < ActionController::TestCase
     assert_not_nil assigns(:issues)
     assert_not_nil assigns(:issue_count_by_group)
     assert_equal 'application/pdf', @response.content_type
+  end
+  
+  def test_index_print_format    
+    get :index, :format => 'print'
+    assert_response :success
+    assert_template 'print.rhtml'
+
+    assert_tag :tag => 'h2', :content => "#1 - Can't print recipes"
+    assert_tag :tag => 'ul', :attributes => { :class => "issue-cols" }
+    assert_tag :tag => 'li', :content => 'Bug', :child => { :tag => 'strong', :content => 'tracker'}
+  end
+  
+  def test_index_print_format_grouped
+    get :index, :project_id => 1, :query_id => 6, :format => 'print'
+    assert_response :success
+    assert_template 'print.rhtml'
+
+    assert_tag :tag => 'h2', :attributes => { :class => "group-heading" }
+    assert_tag :tag => 'div', :attributes => { :class => "group-wrapper" }
+    assert_tag :tag => 'h3', :content => "#1 - Can't print recipes"
+  end
+  
+  def test_index_print_format_no_columns_with_only_subject
+    columns = ['subject']
+    get :index, :format => 'print', :query => { 'column_names' => columns}
+    assert_response :success
+    assert_no_tag :tag => 'ul', :attributes => { :class => "issue-cols" }
+  end
+  
+  def test_index_print_format_one_non_subject_column
+    columns = ['tracker']
+    get :index, :format => 'print', :query => { 'column_names' => columns}
+    assert_response :success
+    assert_tag :tag => 'ul', :attributes => { :class => "issue-cols" }
   end
   
   def test_index_sort

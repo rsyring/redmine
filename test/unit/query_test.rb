@@ -212,6 +212,24 @@ class QueryTest < ActiveSupport::TestCase
     assert q.has_column?(c)
   end
   
+  def test_has_column
+    q = Query.new
+    q.column_names = [:subject]
+    c = q.columns.first
+    assert q.has_column?(c)
+  end
+  
+  def test_has_column_using_field_name
+    q = Query.new
+    q.column_names = [:subject]
+    assert q.has_column?(:subject)
+    assert !q.has_column?(:foobar)
+    
+    # empty query
+    q = Query.new
+    assert !q.has_column?(:foobar)
+  end
+  
   def test_groupable_columns_should_include_custom_fields
     q = Query.new
     assert q.groupable_columns.detect {|c| c.is_a? QueryCustomFieldColumn}

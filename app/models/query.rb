@@ -304,7 +304,14 @@ class Query < ActiveRecord::Base
   end
   
   def has_column?(column)
-    column_names && column_names.include?(column.name)
+    if !column_names
+      return false
+    end
+    if column.respond_to?('name')
+      column_names.include?(column.name)
+    else
+      column_names.include?(column)
+    end
   end
   
   def has_default_columns?
